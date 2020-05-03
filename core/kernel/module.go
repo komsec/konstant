@@ -4,16 +4,20 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/komsec/konstant/core"
 )
 
 //ModuleAudit define kernel module struct
 type ModuleAudit struct {
-	Name string // module name
+	Name        string // module name
+	core.Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
 }
 
 //ModuleRemediate define kernel module struct
 type ModuleRemediate struct {
-	Name string // module name
+	Name        string // module name
+	core.Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
 }
 
 //Centos7 implement audit for any kernel module based checks

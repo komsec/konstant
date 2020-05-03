@@ -2,15 +2,15 @@ package checks
 
 import "github.com/komsec/konstant/core/kernel"
 
-func getKernelModuleCheck(name, desc, group string, scored bool) check {
+func getKernelModuleCheck(id, moduleName, desc, group string, scored bool) check {
 	return check{
-		name:        name,
+		id:        id,
 		description: desc,
 		scored:      scored,
 		types: checkType{
 			group:         group,
-			auditType:     kernel.ModuleAudit{Name: name},
-			remediateType: kernel.ModuleRemediate{Name: name},
+			auditType:     kernel.ModuleAudit{Name: moduleName},
+			remediateType: kernel.ModuleRemediate{Name: moduleName},
 		},
 	}
 }
