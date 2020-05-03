@@ -3,6 +3,7 @@ package checks
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/komsec/konstant/core"
 )
@@ -14,20 +15,23 @@ type checkType struct {
 }
 
 type check struct {
-	name        string
-	description string
-	scored      bool
-	types       checkType
+	id          string            // check ID
+	params      map[string]string // check parameters
+	description string            // description
+	scored      bool              // scored or not
+	types       checkType         //check type
 }
 
+//TODO: name should be the check number, there should OS version (in case of devices what to do?)
 type result struct {
-	Group       string `json:"group"`       //check group e.g filesystem
-	Name        string `json:"name"`        // check name
-	Description string `json:"description"` //check description
-	Scored      bool   `json:"scored"`      //scored or not
-	Success     bool   `json:"success"`     //success or not
-	Error       string `json:"error"`       //Error message
-	Message     string `json:"message"`     // optional message
+	Group       string           `json:"group"`             //check group e.g filesystem
+	ID          string           `json:"id"`                // check name
+	Description string           `json:"description"`       //check description
+	Scored      bool             `json:"scored"`            //scored or not
+	Status      core.CheckStatus `json:"status"`            //check status
+	Error       string           `json:"error,omitempty"`   //Error message
+	Message     string           `json:"message,omitempty"` // optional message
+	Time        string           `json:"datetime"`          // check run time
 }
 
 type results []result
@@ -43,14 +47,14 @@ func RunAudit() (string, error) {
 	for i := range checkList {
 		r = append(r, result{
 			Group:       checkList[i].types.group,
-			Name:        checkList[i].name,
+			ID:          checkList[i].id,
 			Description: checkList[i].description,
 			Scored:      checkList[i].scored,
-			Success:     true,
 		})
-		r[i].Message, err = checkList[i].types.auditType.Centos7()
+		// TODO: Detect OS/Device and call appropriate method
+		r[i].Time = time.Now().Format(time.RFC1123)
+		r[i].Status, r[i].Message, err = checkList[i].types.auditType.Centos7()
 		if err != nil {
-			r[i].Success = false
 			r[i].Error = err.Error()
 			failed = true
 		}
