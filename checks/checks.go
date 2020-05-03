@@ -3,6 +3,7 @@ package checks
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/komsec/konstant/core"
 )
@@ -30,6 +31,7 @@ type result struct {
 	Success     bool   `json:"success"`           //success or not
 	Error       string `json:"error,omitempty"`   //Error message
 	Message     string `json:"message,omitempty"` // optional message
+	Time        string `json:"datetime"`          // check run time
 }
 
 type results []result
@@ -50,8 +52,8 @@ func RunAudit() (string, error) {
 			Scored:      checkList[i].scored,
 			Success:     true,
 		})
-		//Detect OS/Device
-		//Call appropriate method
+		// TODO: Detect OS/Device and call appropriate method
+		r[i].Time = time.Now().Format(time.RFC1123)
 		r[i].Message, err = checkList[i].types.auditType.Centos7()
 		if err != nil {
 			r[i].Success = false
