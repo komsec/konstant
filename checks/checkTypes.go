@@ -4,7 +4,7 @@ import "github.com/komsec/konstant/core/kernel"
 
 func getKernelModuleCheck(id, moduleName, desc, group string, scored bool) check {
 	return check{
-		id:        id,
+		id:          id,
 		description: desc,
 		scored:      scored,
 		types: checkType{

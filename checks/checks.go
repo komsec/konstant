@@ -24,14 +24,14 @@ type check struct {
 
 //TODO: name should be the check number, there should OS version (in case of devices what to do?)
 type result struct {
-	Group       string `json:"group"`             //check group e.g filesystem
-	ID          string `json:"id"`                // check name
-	Description string `json:"description"`       //check description
-	Scored      bool   `json:"scored"`            //scored or not
-	Success     bool   `json:"success"`           //success or not
-	Error       string `json:"error,omitempty"`   //Error message
-	Message     string `json:"message,omitempty"` // optional message
-	Time        string `json:"datetime"`          // check run time
+	Group       string           `json:"group"`             //check group e.g filesystem
+	ID          string           `json:"id"`                // check name
+	Description string           `json:"description"`       //check description
+	Scored      bool             `json:"scored"`            //scored or not
+	Status      core.CheckStatus `json:"status"`            //check status
+	Error       string           `json:"error,omitempty"`   //Error message
+	Message     string           `json:"message,omitempty"` // optional message
+	Time        string           `json:"datetime"`          // check run time
 }
 
 type results []result
@@ -50,13 +50,11 @@ func RunAudit() (string, error) {
 			ID:          checkList[i].id,
 			Description: checkList[i].description,
 			Scored:      checkList[i].scored,
-			Success:     true,
 		})
 		// TODO: Detect OS/Device and call appropriate method
 		r[i].Time = time.Now().Format(time.RFC1123)
-		r[i].Message, err = checkList[i].types.auditType.Centos7()
+		r[i].Status, r[i].Message, err = checkList[i].types.auditType.Centos7()
 		if err != nil {
-			r[i].Success = false
 			r[i].Error = err.Error()
 			failed = true
 		}
