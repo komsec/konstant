@@ -1,7 +1,7 @@
 package checks
 
 import (
-	"github.com/komsec/konstant/core/kernel"
+	"github.com/komsec/konstant/core"
 )
 
 type kernelModuleParams struct {
@@ -23,7 +23,7 @@ func (c *check) unmarshalKernelModuleCheck(unmarshal func(interface{}) error) er
 		return err
 	}
 	c.kernelModuleCheck = &km
-	c.auditType = kernel.ModuleAudit{Name: c.Params.Name}
-	c.remediateType = kernel.ModuleRemediate{Name: c.Params.Name}
+	c.auditType = core.KernelModuleAudit{Name: c.Params.Name}
+	c.remediateType = core.KernelModuleRemediate{Name: c.Params.Name}
 	return nil
 }
