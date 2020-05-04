@@ -1,0 +1,54 @@
+---
+- parents:
+  - 1: Initial Setup
+  - 1.1: Filesystem Configuration
+  - 1.1.1: Disable unused filesystems
+  checks:
+  - id: 1.1.1.1
+    desc: Ensure mounting of cramfs filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: cramfs
+  - id: 1.1.1.2
+    desc: Ensure mounting of freevxfs filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: freevxfs
+  - id: 1.1.1.3
+    desc: Ensure mounting of jffs2 filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: jffs2
+  - id: 1.1.1.4
+    desc: Ensure mounting of hfs filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: hfs
+  - id: 1.1.1.5
+    desc: Ensure mounting of hfsplus filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: hfsplus
+  - id: 1.1.1.6
+    desc: Ensure mounting of squashfs filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: squashfs
+  - id: 1.1.1.7
+    desc: Ensure mounting of udf filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: udf
+  - id: 1.1.1.8
+    desc: Ensure mounting of FAT filesystems is disabled
+    type: kernelModule
+    scored: true
+    params:
+      name: vfat

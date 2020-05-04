@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -8,7 +9,9 @@ import (
 )
 
 func main() {
-	res, err := checks.RunAudit()
+	c := flag.String("checks-dir", "/etc/konstant", "Directory that contain konstant checks yaml files")
+	flag.Parse()
+	res, err := checks.RunAudit(*c)
 	fmt.Println(res)
 	if err != nil {
 		fmt.Println(err.Error())
