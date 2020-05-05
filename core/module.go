@@ -8,13 +8,13 @@ import (
 
 //KernelModuleAudit define kernel module struct
 type KernelModuleAudit struct {
-	Name        string // module name
+	Name   string // module name
 	Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
 }
 
 //KernelModuleRemediate define kernel module struct
 type KernelModuleRemediate struct {
-	Name        string // module name
+	Name   string // module name
 	Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
 }
 

@@ -11,12 +11,20 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type general struct {
+	ID     string // check id
+	Desc   string // description of the check
+	Scored bool   //scored or not
+}
+
 type check struct {
 	auditType     core.Runner // audit type
 	remediateType core.Runner // remediate type
-
+	general                   //general params
 	// Embed Various type of checks - there will be different parameters for different type of checks
-	*kernelModuleCheck //Kernel module specific params
+	*kernelModuleCheck //Kernel module check
+
+	*mountPointCheck // Mountpoint check
 }
 
 func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -26,9 +34,20 @@ func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&t); err != nil {
 		return err
 	}
+
+	d := general{}
+	if err := unmarshal(&d); err != nil {
+		return err
+	}
+	c.ID = d.ID
+	c.Desc = d.Desc
+	c.Scored = d.Scored
+
 	switch {
 	case t.Type == "kernelModule":
 		c.unmarshalKernelModuleCheck(unmarshal)
+	case t.Type == "mountPoint":
+		c.unmarshalMountPointCheck(unmarshal)
 	default:
 		return fmt.Errorf("Invalid check type - %s", t.Type)
 	}
@@ -94,19 +113,24 @@ func RunAudit(dir string) (string, error) {
 	var failed bool
 	for i := range checkList {
 		for c := range checkList[i].Checks {
+			// TODO: Detect OS/Device and call appropriate method
+			t := time.Now().Format(time.RFC1123)
+			s, msg, err := checkList[i].Checks[c].auditType.Centos7()
+			var e string
+			if err != nil {
+				e = err.Error()
+				failed = true
+			}
 			r = append(r, result{
 				Parents:     checkList[i].Parents,
 				ID:          checkList[i].Checks[c].ID,
 				Description: checkList[i].Checks[c].Desc,
 				Scored:      checkList[i].Checks[c].Scored,
+				Time:        t,
+				Status:      s,
+				Message:     msg,
+				Error:       e,
 			})
-			// TODO: Detect OS/Device and call appropriate method
-			r[c].Time = time.Now().Format(time.RFC1123)
-			r[c].Status, r[c].Message, err = checkList[i].Checks[c].auditType.Centos7()
-			if err != nil {
-				r[c].Error = err.Error()
-				failed = true
-			}
 		}
 	}
 	o.Results = r

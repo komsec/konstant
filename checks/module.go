@@ -9,10 +9,6 @@ type kernelModuleParams struct {
 }
 
 type kernelModuleCheck struct {
-	ID     string             `yaml:"id"`     // check id
-	Desc   string             `yaml:"desc"`   // description of the check
-	Scored bool               `yaml:"scored"` //scored or not
-	Type   string             `yaml:"type"`   // check type
 	Params kernelModuleParams `yaml:"params"` // check parameters
 }
 
@@ -23,7 +19,7 @@ func (c *check) unmarshalKernelModuleCheck(unmarshal func(interface{}) error) er
 		return err
 	}
 	c.kernelModuleCheck = &km
-	c.auditType = core.KernelModuleAudit{Name: c.Params.Name}
-	c.remediateType = core.KernelModuleRemediate{Name: c.Params.Name}
+	c.auditType = core.KernelModuleAudit{Name: km.Params.Name}
+	c.remediateType = core.KernelModuleRemediate{Name: km.Params.Name}
 	return nil
 }

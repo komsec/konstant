@@ -52,3 +52,13 @@
     scored: true
     params:
       name: vfat
+- parents:
+  - 1: Initial Setup
+  - 1.1: Filesystem Configuration
+  checks:
+  - id: 1.1.2
+    desc: Ensure separate partition exists for /tmp
+    type: mountPoint
+    scored: true
+    params:
+      path: /tmp
