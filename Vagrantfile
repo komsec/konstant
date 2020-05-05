@@ -8,7 +8,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
   config.vm.define "n1"
-  config.vm.define "n2"
+  # config.vm.define "n2"
   config.vm.box = "centos/7"
   # config.vm.synced_folder "../data", "/vagrant_data"
   config.vm.synced_folder "../", "/code"
