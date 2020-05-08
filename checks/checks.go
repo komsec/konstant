@@ -23,8 +23,8 @@ type check struct {
 	general                   //general params
 	// Embed Various type of checks - there will be different parameters for different type of checks
 	*kernelModuleCheck //Kernel module check
-
-	*mountPointCheck // Mountpoint check
+	*mountPointCheck   // Mountpoint check
+	*mountOptionCheck  // MountOption check
 }
 
 func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -43,11 +43,13 @@ func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Desc = d.Desc
 	c.Scored = d.Scored
 
-	switch {
-	case t.Type == "kernelModule":
+	switch t.Type {
+	case "kernelModule":
 		c.unmarshalKernelModuleCheck(unmarshal)
-	case t.Type == "mountPoint":
+	case "mountPoint":
 		c.unmarshalMountPointCheck(unmarshal)
+	case "mountOption":
+		c.unmarshalMountOptionCheck(unmarshal)
 	default:
 		return fmt.Errorf("Invalid check type - %s", t.Type)
 	}
@@ -103,10 +105,10 @@ func getChecks(dir string) ([]checksInput, error) {
 }
 
 //RunAudit run checks
-func RunAudit(dir string) (string, error) {
+func RunAudit(dir string) (res string, ok bool, err error) {
 	checkList, err := getChecks(dir)
 	if err != nil {
-		return "", err
+		return res, ok, err
 	}
 	var o response
 	var r []result
@@ -142,7 +144,8 @@ func RunAudit(dir string) (string, error) {
 	}
 	j, err := json.Marshal(o)
 	if err != nil {
-		return "", fmt.Errorf("Failed jsonify the result: %s", err)
+		return res, ok, fmt.Errorf("Failed jsonify the result: %s", err)
 	}
-	return string(j), nil
+
+	return string(j), o.Success, nil
 }
