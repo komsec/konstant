@@ -28,6 +28,14 @@ type check struct {
 }
 
 func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
+
+	// Map all checktypes with appropriate unmarshal methods here
+	checkTypes := map[string]func(func(interface{}) error) error{
+		"kernelModule": c.unmarshalKernelModuleCheck,
+		"mountPoint":   c.unmarshalMountPointCheck,
+		"mountOption":  c.unmarshalMountOptionCheck,
+	}
+
 	t := struct {
 		Type string `yaml:"type"`
 	}{}
@@ -43,16 +51,12 @@ func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Desc = d.Desc
 	c.Scored = d.Scored
 
-	switch t.Type {
-	case "kernelModule":
-		c.unmarshalKernelModuleCheck(unmarshal)
-	case "mountPoint":
-		c.unmarshalMountPointCheck(unmarshal)
-	case "mountOption":
-		c.unmarshalMountOptionCheck(unmarshal)
-	default:
+	if ct := checkTypes[t.Type]; ct != nil {
+		ct(unmarshal)
+	} else {
 		return fmt.Errorf("Invalid check type - %s", t.Type)
 	}
+
 	return nil
 }
 
