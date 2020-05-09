@@ -19,8 +19,7 @@ func (c *check) unmarshalMountPointCheck(unmarshal func(interface{}) error) erro
 		return err
 	}
 	c.mountPointCheck = &m
-	c.auditType = core.MountPointAudit{Path: m.Params.Path}
-	c.remediateType = core.MountPointRemediate{Path: m.Params.Path}
+	c.checkType = core.MountPoint{Path: m.Params.Path}
 	return nil
 }
 
@@ -40,10 +39,9 @@ func (c *check) unmarshalMountOptionCheck(unmarshal func(interface{}) error) err
 		return err
 	}
 	c.mountOptionCheck = &m
-	c.auditType = core.MountOptionAudit{
+	c.checkType = core.MountOption{
 		Path:        m.Params.Path,
 		MountOption: m.Params.MountOption,
 	}
-	c.remediateType = core.MountOptionRemediate{Path: m.Params.Path}
 	return nil
 }

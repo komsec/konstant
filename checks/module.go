@@ -19,7 +19,6 @@ func (c *check) unmarshalKernelModuleCheck(unmarshal func(interface{}) error) er
 		return err
 	}
 	c.kernelModuleCheck = &km
-	c.auditType = core.KernelModuleAudit{Name: km.Params.Name}
-	c.remediateType = core.KernelModuleRemediate{Name: km.Params.Name}
+	c.checkType = core.KernelModule{Name: km.Params.Name}
 	return nil
 }

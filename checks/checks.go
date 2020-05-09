@@ -2,6 +2,7 @@ package checks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -18,9 +19,8 @@ type general struct {
 }
 
 type check struct {
-	auditType     core.Runner // audit type
-	remediateType core.Runner // remediate type
-	general                   //general params
+	checkType core.Runner // audit type
+	general               //general params
 	// Embed Various type of checks - there will be different parameters for different type of checks
 	*kernelModuleCheck //Kernel module check
 	*mountPointCheck   // Mountpoint check
@@ -89,7 +89,7 @@ type response struct {
 func getChecks(dir string) ([]checksInput, error) {
 	var in []checksInput
 	abs, _ := filepath.Abs(dir)
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", abs))
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.yml", abs))
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +110,11 @@ func getChecks(dir string) ([]checksInput, error) {
 
 //RunAudit run checks
 func RunAudit(dir string) (res string, ok bool, err error) {
+	//Detect Operating system and fail in case of unsupported operating system or version
+	_, _, err = core.GetOSNameVersion()
+	if err != nil {
+		return res, ok, errors.New("Unsupported Operating system or version")
+	}
 	checkList, err := getChecks(dir)
 	if err != nil {
 		return res, ok, err
@@ -121,7 +126,7 @@ func RunAudit(dir string) (res string, ok bool, err error) {
 		for c := range checkList[i].Checks {
 			// TODO: Detect OS/Device and call appropriate method
 			t := time.Now().Format(time.RFC1123)
-			s, msg, err := checkList[i].Checks[c].auditType.Centos7()
+			s, msg, err := checkList[i].Checks[c].checkType.Audit()
 			var e string
 			if err != nil {
 				e = err.Error()
