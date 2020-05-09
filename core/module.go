@@ -6,23 +6,23 @@ import (
 	"strings"
 )
 
-//KernelModule define kernel module struct
+// KernelModule define kernel module struct
+//It must implement both core.Runner and core.checker interfaces
 type KernelModule struct {
 	Name string // module name
 }
 
-//Audit perform audit checks
+//Audit implements core.Runner interface
 func (m KernelModule) Audit() (status CheckStatus, msg string, err error) {
-	return runCheck(m, checkAudit)
+	return runCheck(m, "audit")
 }
 
-//Remediate perform audit checks
+//Remediate implements core.Runner interface
 func (m KernelModule) Remediate() (status CheckStatus, msg string, err error) {
-	return runCheck(m, checkRemdiate)
+	return runCheck(m, "remediate")
 }
 
-
-//Centos7 implement audit for any kernel module based checks
+//auditCentos7 implements core.checker interface
 func (m KernelModule) auditCentos7() (status CheckStatus, msg string, err error) {
 	out, err := exec.Command("modprobe", "-n", "-v", m.Name).Output()
 	if err != nil {
@@ -51,6 +51,7 @@ func (m KernelModule) auditCentos7() (status CheckStatus, msg string, err error)
 	return StatusPass, msg, nil
 }
 
+//remediateCentos7 implements core.checker interface
 func (m KernelModule) remediateCentos7() (status CheckStatus, msg string, err error) {
 	fmt.Println("Executing centos7 Remediate for", m.Name)
 	return StatusPass, msg, err

@@ -38,6 +38,7 @@ func (c mountCheck) nix() (status CheckStatus, msg string, err error) {
 }
 
 //MountPoint define kernel module struct
+//It must implement both core.Runner and core.checker interfaces
 type MountPoint struct {
 	Path   string // Mount Path
 	Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
@@ -65,6 +66,7 @@ func (m MountPoint) remediateCentos7() (status CheckStatus, msg string, err erro
 }
 
 //MountOption define kernel module struct
+//It must implement both core.Runner and core.checker interfaces
 type MountOption struct {
 	Path        string // Mount Path
 	MountOption string //Mount option

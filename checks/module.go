@@ -12,13 +12,16 @@ type kernelModuleCheck struct {
 	Params kernelModuleParams `yaml:"params"` // check parameters
 }
 
-//Handle unmarshalling inputs configuration
-func (c *check) unmarshalKernelModuleCheck(unmarshal func(interface{}) error) error {
+func init() {
+	//Add unmarshal function to checkTypes map, so Unmarshal can call it
+	checkTypes["kernelModule"] = unmarshalKernelModuleCheck
+}
+
+//Unmarshal params
+func unmarshalKernelModuleCheck(unmarshal func(interface{}) error) (param interface{}, chk core.Runner, err error) {
 	var km kernelModuleCheck
 	if err := unmarshal(&km); err != nil {
-		return err
+		return param, chk, err
 	}
-	c.kernelModuleCheck = &km
-	c.checkType = core.KernelModule{Name: km.Params.Name}
-	return nil
+	return km.Params, core.KernelModule{Name: km.Params.Name},  nil
 }

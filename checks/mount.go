@@ -12,15 +12,19 @@ type mountPointCheck struct {
 	Params mountPointParams `yaml:"params"` // check parameters
 }
 
+func init() {
+	//Add unmarshal functions to checkTypes map, so Unmarshal can call it
+	checkTypes["mountPoint"] = unmarshalMountPointCheck
+	checkTypes["mountOption"] = unmarshalMountOptionCheck
+}
+
 //Handle unmarshalling inputs configuration
-func (c *check) unmarshalMountPointCheck(unmarshal func(interface{}) error) error {
+func unmarshalMountPointCheck(unmarshal func(interface{}) error) (param interface{}, chk core.Runner, err error) {
 	var m mountPointCheck
 	if err := unmarshal(&m); err != nil {
-		return err
+		return param, chk, err
 	}
-	c.mountPointCheck = &m
-	c.checkType = core.MountPoint{Path: m.Params.Path}
-	return nil
+	return m.Params, core.MountPoint{Path: m.Params.Path}, nil
 }
 
 type mountOptionParams struct {
@@ -33,15 +37,14 @@ type mountOptionCheck struct {
 }
 
 //Handle unmarshalling inputs configuration
-func (c *check) unmarshalMountOptionCheck(unmarshal func(interface{}) error) error {
+func unmarshalMountOptionCheck(unmarshal func(interface{}) error) (param interface{}, chk core.Runner, err error) {
 	var m mountOptionCheck
 	if err := unmarshal(&m); err != nil {
-		return err
+		return param, chk, err
 	}
-	c.mountOptionCheck = &m
-	c.checkType = core.MountOption{
+	ct := core.MountOption{
 		Path:        m.Params.Path,
 		MountOption: m.Params.MountOption,
 	}
-	return nil
+	return m.Params, ct, nil
 }
