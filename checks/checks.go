@@ -2,6 +2,7 @@ package checks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -18,23 +19,16 @@ type general struct {
 }
 
 type check struct {
-	auditType     core.Runner // audit type
-	remediateType core.Runner // remediate type
-	general                   //general params
-	// Embed Various type of checks - there will be different parameters for different type of checks
-	*kernelModuleCheck //Kernel module check
-	*mountPointCheck   // Mountpoint check
-	*mountOptionCheck  // MountOption check
+	checkType core.Runner // audit type
+	general               //general params
+	// Params may be in different types based on actual check params,
+	//  which will be defined check specific definitions
+	Params interface{}
 }
 
-func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
+var checkTypes = make(map[string]func(func(interface{}) error) (interface{}, core.Runner, error))
 
-	// Map all checktypes with appropriate unmarshal methods here
-	checkTypes := map[string]func(func(interface{}) error) error{
-		"kernelModule": c.unmarshalKernelModuleCheck,
-		"mountPoint":   c.unmarshalMountPointCheck,
-		"mountOption":  c.unmarshalMountOptionCheck,
-	}
+func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	t := struct {
 		Type string `yaml:"type"`
@@ -50,9 +44,12 @@ func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.ID = d.ID
 	c.Desc = d.Desc
 	c.Scored = d.Scored
-
+	var err error
 	if ct := checkTypes[t.Type]; ct != nil {
-		ct(unmarshal)
+		c.Params, c.checkType, err = ct(unmarshal)
+		if err != nil {
+			return err
+		}
 	} else {
 		return fmt.Errorf("Invalid check type - %s", t.Type)
 	}
@@ -89,7 +86,7 @@ type response struct {
 func getChecks(dir string) ([]checksInput, error) {
 	var in []checksInput
 	abs, _ := filepath.Abs(dir)
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", abs))
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.yml", abs))
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +107,11 @@ func getChecks(dir string) ([]checksInput, error) {
 
 //RunAudit run checks
 func RunAudit(dir string) (res string, ok bool, err error) {
+	//Detect Operating system and fail in case of unsupported operating system or version
+	_, _, err = core.GetOSNameVersion()
+	if err != nil {
+		return res, ok, errors.New("Unsupported Operating system or version")
+	}
 	checkList, err := getChecks(dir)
 	if err != nil {
 		return res, ok, err
@@ -119,9 +121,8 @@ func RunAudit(dir string) (res string, ok bool, err error) {
 	var failed bool
 	for i := range checkList {
 		for c := range checkList[i].Checks {
-			// TODO: Detect OS/Device and call appropriate method
 			t := time.Now().Format(time.RFC1123)
-			s, msg, err := checkList[i].Checks[c].auditType.Centos7()
+			s, msg, err := checkList[i].Checks[c].checkType.Audit()
 			var e string
 			if err != nil {
 				e = err.Error()

@@ -37,51 +37,66 @@ func (c mountCheck) nix() (status CheckStatus, msg string, err error) {
 	return StatusPass, msg, nil
 }
 
-//MountPointAudit define kernel module struct
-type MountPointAudit struct {
+//MountPoint define kernel module struct
+//It must implement both core.Runner and core.checker interfaces
+type MountPoint struct {
 	Path   string // Mount Path
 	Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
 }
 
-//MountPointRemediate define kernel module struct
-type MountPointRemediate struct {
-	Path   string // Mount Path
-	Runner        //Embed Runner interface to avoid error on any Methods not being implemented by this
+//Audit perform audit checks
+func (m MountPoint) Audit() (status CheckStatus, msg string, err error) {
+	return runCheck(m, checkAudit)
 }
 
-//Centos7 implement audit for any kernel module based checks
-func (a MountPointAudit) Centos7() (status CheckStatus, msg string, err error) {
-	m := mountCheck{
-		path: a.Path,
+//Remediate perform audit checks
+func (m MountPoint) Remediate() (status CheckStatus, msg string, err error) {
+	return runCheck(m, checkRemdiate)
+}
+
+func (m MountPoint) auditCentos7() (status CheckStatus, msg string, err error) {
+	mc := mountCheck{
+		path: m.Path,
 	}
-	return m.nix()
+	return mc.nix()
 }
 
-//MountOptionAudit define kernel module struct
-type MountOptionAudit struct {
-	Path        string // Mount Path
-	MountOption string //Mount option
-	Runner             //Embed Runner interface to avoid error on any Methods not being implemented by this
+func (m MountPoint) remediateCentos7() (status CheckStatus, msg string, err error) {
+	return status, msg, errors.New("Not implemented")
 }
 
-//MountOptionRemediate define kernel module struct
-type MountOptionRemediate struct {
+//MountOption define kernel module struct
+//It must implement both core.Runner and core.checker interfaces
+type MountOption struct {
 	Path        string // Mount Path
 	MountOption string //Mount option
-	Runner             //Embed Runner interface to avoid error on any Methods not being implemented by this
+}
+
+//Audit perform audit checks
+func (mo MountOption) Audit() (status CheckStatus, msg string, err error) {
+	return runCheck(mo, checkAudit)
+}
+
+//Remediate perform audit checks
+func (mo MountOption) Remediate() (status CheckStatus, msg string, err error) {
+	return runCheck(mo, checkRemdiate)
 }
 
 //Centos7 implement audit for any kernel module based checks
-func (a MountOptionAudit) Centos7() (status CheckStatus, msg string, err error) {
+func (mo MountOption) auditCentos7() (status CheckStatus, msg string, err error) {
 	m := mountCheck{
-		a.Path,
-		a.MountOption,
+		mo.Path,
+		mo.MountOption,
 	}
 	status, msg, err = m.nix()
 	if err != nil {
 		if err.Error() == "Search pattern does not matched" {
-			return status, msg, fmt.Errorf("Mount Option %s is not set for path %s", a.MountOption, a.Path)
+			return status, msg, fmt.Errorf("Mount Option %s is not set for path %s", mo.MountOption, mo.Path)
 		}
 	}
 	return status, msg, err
+}
+
+func (mo MountOption) remediateCentos7() (status CheckStatus, msg string, err error) {
+	return status, msg, errors.New("Not implemented")
 }
