@@ -13,9 +13,9 @@ type mountPointCheck struct {
 }
 
 func init() {
-	//Add unmarshal functions to checkTypes map, so Unmarshal can call it
-	checkTypes["mountPoint"] = unmarshalMountPointCheck
-	checkTypes["mountOption"] = unmarshalMountOptionCheck
+	//Add unmarshal functions to checkTypes, so Unmarshal can call it
+	checkTypes.add("mountPoint", unmarshalMountPointCheck)
+	checkTypes.add("mountOption", unmarshalMountOptionCheck)
 }
 
 //Handle unmarshalling inputs configuration

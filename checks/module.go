@@ -13,8 +13,8 @@ type kernelModuleCheck struct {
 }
 
 func init() {
-	//Add unmarshal function to checkTypes map, so Unmarshal can call it
-	checkTypes["kernelModule"] = unmarshalKernelModuleCheck
+	//Add unmarshal function to checkTypes, so Unmarshal can call it
+	checkTypes.add("kernelModule", unmarshalKernelModuleCheck)
 }
 
 //Unmarshal params
@@ -23,5 +23,5 @@ func unmarshalKernelModuleCheck(unmarshal func(interface{}) error) (param interf
 	if err := unmarshal(&km); err != nil {
 		return param, chk, err
 	}
-	return km.Params, core.KernelModule{Name: km.Params.Name},  nil
+	return km.Params, core.KernelModule{Name: km.Params.Name}, nil
 }
