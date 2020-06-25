@@ -26,7 +26,18 @@ type check struct {
 	Params interface{}
 }
 
-var checkTypes = make(map[string]func(func(interface{}) error) (interface{}, core.Runner, error))
+type checkType struct {
+	types map[string]func(func(interface{}) error) (interface{}, core.Runner, error)
+}
+
+func (ct *checkType) add(name string, f func(func(interface{}) error) (interface{}, core.Runner, error)) {
+	ct.types[name] = f
+}
+
+// This one will be used to add new check types
+var checkTypes = checkType{
+	types: make(map[string]func(func(interface{}) error) (interface{}, core.Runner, error)),
+}
 
 func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
@@ -45,7 +56,7 @@ func (c *check) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Desc = d.Desc
 	c.Scored = d.Scored
 	var err error
-	if ct := checkTypes[t.Type]; ct != nil {
+	if ct := checkTypes.types[t.Type]; ct != nil {
 		c.Params, c.checkType, err = ct(unmarshal)
 		if err != nil {
 			return err
